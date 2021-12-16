@@ -5,6 +5,8 @@
 	(foldr append null (map proc seq)))
 
 (define empty-board null)
+
+; it would be more efficient to store only rows since cols are always consecutive
 (define (adjoin-position row k board) (append board (list (list row k))))
 
 (define (queens board-size)
@@ -19,22 +21,22 @@
 							(adjoin-position new-row k rest-of-queens))
 							(inclusive-range 1 board-size)))
 					(queen-cols (- k 1))))))
-	(trace queen-cols)
 	(queen-cols board-size))
 
 (define (safe? positions)
 	(if (= 1 (length positions)) #t
-		(let ([pos (car positions)] [kth (last positions)])
+		(let ([row (caar positions)] [k-row (car (last positions))]
+				[col (cadar positions)] [k-col (cadr (last positions))])
 			(and
-				(and
-					(not (= (car pos) (car kth)))
-					(not (= (cadr pos) (cadr kth)))
-					(not (= (- (car pos) (car kth)) (- (cadr pos) (cadr kth)))))
+				(and (not (= row k-row)) ; row (k-col > col always)
+					(not (= (- k-col col) (abs (- k-row row))))) ; diagonal
 				(safe? (cdr positions))))))
 
 ; (trace queens)
 ; (trace adjoin-position)
 ; (trace safe?)
 
-(for-each (lambda (a) (newline) (display a) ) (queens 3))
+(for-each (lambda (a) (newline) (display a) ) (queens 4))
 (newline)
+(newline)
+(length (queens 12)) ; takes about 10 s
